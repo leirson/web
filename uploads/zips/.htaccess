@@ -1,0 +1,4 @@
+# Pasta protegida — ZIPs dos produtos
+# Acesso direto bloqueado pelo Apache
+Order allow,deny
+Deny from all

@@ -1,0 +1,66 @@
+# AppVendas — Regras de Segurança e Redirecionamento
+# Compatível com Apache (Hostinger)
+
+Options -Indexes
+ServerSignature Off
+
+# ── Proteger arquivos sensíveis ───────────────────────────
+<FilesMatch "\.(sql|log|env|ini|sh|bak|md)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Bloquear acesso direto a includes e config
+<FilesMatch "^(config|functions)\.php$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# ── Proteger pastas internas ──────────────────────────────
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Bloquear acesso direto à pasta includes
+    RewriteRule ^includes/ - [F,L]
+
+    # Bloquear acesso direto à pasta database
+    RewriteRule ^database/ - [F,L]
+</IfModule>
+
+# ── Segurança de uploads (somente imagens) ────────────────
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} ^/uploads/
+    RewriteRule \.(php|php5|phtml|pl|py|jsp|asp|sh|cgi)$ - [F,NC,L]
+</IfModule>
+
+# ── Cabeçalhos de segurança ───────────────────────────────
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ── Cache de assets estáticos ─────────────────────────────
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg        "access plus 1 month"
+    ExpiresByType image/png         "access plus 1 month"
+    ExpiresByType image/gif         "access plus 1 month"
+    ExpiresByType image/webp        "access plus 1 month"
+    ExpiresByType text/css          "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+</IfModule>
+
+# ── Compressão GZIP ───────────────────────────────────────
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript
+</IfModule>
+
+# ── Charset padrão ────────────────────────────────────────
+AddDefaultCharset UTF-8
+
+# ── Erro customizado ──────────────────────────────────────
+ErrorDocument 403 /index.php
+ErrorDocument 404 /index.php
